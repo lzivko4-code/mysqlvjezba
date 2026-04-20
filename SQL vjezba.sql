@@ -81,14 +81,25 @@ DELIMITER $$
 
 CREATE PROCEDURE kupci_drzava(IN k_drzava VARCHAR(50))
 BEGIN
+
     SELECT 
-        k.naziv,
-        k.kredit,
-        SUM(n.iznos) AS ukupno
+        k.naziv AS naziv_kupca,
+        k.kredit AS kreditne_mogucnosti,
+        SUM(n.iznos) AS ukupni_iznos_narudzbi,
+
+        IF(k.kredit >= SUM(n.iznos),
+            'KUPAC SOLVENTAN',
+            'POTREBNO ZADUŽIVANJE'
+        ) AS status_kupca
+
     FROM kupac k
-    JOIN narudzba n ON k.kupacId = n.kupacId
+    JOIN narudzba n 
+        ON k.kupacId = n.kupacId
+
     WHERE k.drzava = k_drzava
+
     GROUP BY k.kupacId, k.naziv, k.kredit;
+
 END$$
 
 DELIMITER ;
